@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastalert
+  namespace: kube-elastalert
+  labels:
+   k8s-app: elastalert
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: elastalert
+  template:
+    metadata:
+      labels:
+        k8s-app: elastalert
+    spec:
+      serviceAccountName: elastalert
+      containers:
+      - name: elastalert
+        image: jertel/elastalert-docker
+        volumeMounts:
+        - name: config
+          mountPath: /opt/config
+        - name: rules
+          mountPath: /opt/rules
+        command: 
+        - elastalert
+        - --config
+        - /opt/config/elastalert_config.yaml
+        - --verbose
+        - --start
+        -  2021-06-18T01:00:00
+      volumes:
+        - name: rules
+          configMap:
+            name: logstash-rule
+        - name: config
+          configMap:
+            name: elast-config
+            

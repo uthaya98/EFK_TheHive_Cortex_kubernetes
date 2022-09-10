@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-fluentd-config
+  namespace: uthaya
+  labels:
+    k8s-app: fluentd-custom
+data:
+    containers.conf: |- 
+     <source>
+       @type tail
+       read_from_head true
+       path /home/uthayasurian/Downloads/nginx/access_log2/data2.log
+       # pos_file /var/log/td-agent/access.log.pos
+       tag elasticsearch
+       format  /^(?<ip>[^ ]*) - (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^ ]*) +\S*)?" (?<code>[^ ]*) (?<size>[0-9]+) "(?<referer>[^\"]*)" "(?<agent>[^\"]*)" "-"$/
+       time_format %d/%b/%Y:%H:%M:%S %z
+     </source>
+
+     <match elasticsearch>
+       @type copy
+       <store>
+         @type elasticsearch
+         host elasticsearch-master-0.elasticsearch-master-headless.uthaya.svc.cluster.local
+         port 9200
+         logstash_format true
+         index_name fluenty
+         logstash_dateformat %Y%m%d
+         include_tag_key true
+         tag_key @log_name
+         flush_interval 300s
+       </store>
+       <store>
+         @type stdout
+       </store>
+     </match>

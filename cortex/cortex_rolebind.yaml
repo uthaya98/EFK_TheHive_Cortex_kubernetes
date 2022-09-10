@@ -1,0 +1,14 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cortex-job-runner
+  namespace: uthaya
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: job-runner
+subjects:
+- kind: ServiceAccount
+  name: cortex
+  namespace: uthaya

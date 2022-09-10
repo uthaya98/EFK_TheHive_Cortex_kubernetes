@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: uthaya
+  name: cortex
+  labels:
+    app: cortex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cortex
+  template:
+    metadata:
+      labels:
+        app: cortex
+    spec:
+      serviceAccountName: cortex
+      volumes:
+      - name: jobdir
+        persistentVolumeClaim:
+          claimName: hppvc
+      - name: cortex-config
+        configMap: 
+          name: cortex-config
+      containers:
+      - name: cortex
+        image: thehiveproject/cortex
+        env:
+          - name: es_uri
+            value: http://elasticsearch-master-headless.uthaya.svc.cluster.local:9200
+          - name: kubernetes_job_pvc
+            value: hppvc
+        volumeMounts:
+        - mountPath: /tmp/cortex-jobs
+          name: jobdir
+        - name: cortex-config
+          mountPath: /etc/config
